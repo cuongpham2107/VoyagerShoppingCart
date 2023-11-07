@@ -13,6 +13,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     $test = App\Models\ProductCategory::create([
+//         'name' => 'ROOT',
+//         'description' => 'category root',
+//         'order' => 1,
+//         'parent_id' => 0,
+//         'image' => ' ',
+//         'icon' => ' ',
+//         'status' => 'published'
+//     ]);
+//     dd($test);
+// });
+
+
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+    Route::post('delete_file_folder', ['uses' => 'App\Http\Controllers\Admin\CustomMediaController@delete', 'as' => 'delete_image_media']);
 });
