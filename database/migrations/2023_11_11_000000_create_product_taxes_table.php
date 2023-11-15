@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('product_taxes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('percentage');
-            $table->integer('order');
-            $table->string('status');
+            $table->string('percentage')->nullable();
+            $table->integer('order')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

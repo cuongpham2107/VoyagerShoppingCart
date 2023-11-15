@@ -15,15 +15,30 @@ class ProductCategory extends Model
      */
     protected $guarded = [];
 
-    
+    public $additional_attributes = ['icon_name_category'];
+
    /**
     * Get all of the comments for the ProductCategory
     *
     * @return \Illuminate\Database\Eloquent\Relations\HasMany
     */
-   public function children(): HasMany
-   {
-       return $this->hasMany(ProductCategory::class, 'parent_id', 'id')->select('id','name','parent_id','order');
-   }
+    public function children(): HasMany
+    {
+        return $this->hasMany(ProductCategory::class, 'parent_id', 'id')->with('parent')->select('id','name','parent_id','order');
+    }
+     /**
+     * Get the user that owns the ProductCategory
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function parent() : BelongsTo
+    {
+        return $this->belongsTo(ProductCategory::class, 'parent_id', 'id');
+    } 
+        
     
-}
+    public function getIconNameAttribute()
+    {
+        return "{$this->icon} {$this->name}";
+    }
+}  

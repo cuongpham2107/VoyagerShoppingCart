@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('product_brands', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
-            $table->string('status');
-            $table->text('logo');
-            $table->string('is_featured');
-            $table->string('category_id');
+            $table->text('description')->nullable();
+            $table->string('status')->nullable();
+            $table->text('logo')->nullable();
+            $table->integer('order')->nullable();
+            $table->string('is_featured')->nullable();
+            $table->string('category_id')->nullable();
             $table->timestamps();
         });
     }

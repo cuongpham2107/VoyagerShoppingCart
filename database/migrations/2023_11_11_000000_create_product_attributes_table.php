@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('product_attributes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug');
-            $table->text('attributes_list');
-            $table->string('status');
-            $table->string('display_layout');
+            $table->string('slug')->nullable();
+            $table->text('attributes_list')->nullable();
+            $table->string('status')->nullable();
+            $table->string('display_layout')->nullable();
             $table->integer('order')->nullable();
             $table->string('category_id')->nullable();
             $table->timestamps();

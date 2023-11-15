@@ -55,7 +55,7 @@
                             <input x-model="name_attribute" @input="generateSlug" type="text" class="form-control"
                                 id="title" name="name"
                                 placeholder=" {{ trans('product-attributes.Placeholder Name') }} "
-                                value="{{ $dataTypeContent->name ?? '' }}">
+                                >
                         </div>
 
                         <div class="panel-heading">
@@ -80,12 +80,12 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col" style="width:10%">Is default?</th>
-                                        <th scope="col">TITLE</th>
-                                        <th scope="col">SLUG</th>
-                                        <th scope="col">COLOR</th>
-                                        <th scope="col">IMAGE</th>
-                                        <th scope="col">REMOVE</th>
+                                        <th scope="col" style="width:10%">{{ trans('product-attributes.Is default?') }}</th>
+                                        <th scope="col">{{ trans('product-attributes.TITLE') }}</th>
+                                        <th scope="col">{{ trans('product-attributes.SLUG') }}</th>
+                                        <th scope="col">{{ trans('product-attributes.COLOR') }}</th>
+                                        <th scope="col">{{ trans('product-attributes.IMAGE') }}</th>
+                                        <th scope="col">{{ trans('product-attributes.REMOVE') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -118,9 +118,11 @@
                                             <td>
                                                 <label x-bind:for="'uploadImage-' + index">
                                                     <img x-bind:id="'output-image-' + index"
+                                                        x-bind:src="row.image ? `{{ Voyager::image('${row.image}') }}` : 'https://edutalk.edu.vn/_nuxt/assets/images/default.jpg'"
                                                         src="https://edutalk.edu.vn/_nuxt/assets/images/default.jpg"
                                                         alt="" width="35" height="35"
-                                                        style="margin-left: 15px;">
+                                                        style="margin-left: 15px;"
+                                                        >
                                                 </label>
                                                 <input x-on:change.debounce="loadFile($event,index)" type="file"
                                                     x-bind:id="'uploadImage-' + index" style="display:none;" value=''>
@@ -167,7 +169,7 @@
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <select class="form-control" name="status">
+                                <select class="form-control" name="display_layout">
                                     <option value="dropdown"@if(isset($dataTypeContent->display_layout) && $dataTypeContent->display_layout == 'dropdown') selected="selected"@endif>Dropdown Swatch</option>
                                     <option value="visual"@if(isset($dataTypeContent->display_layout) && $dataTypeContent->display_layout == 'visual') selected="selected"@endif>Visual Swatch</option>
                                     <option value="text"@if(isset($dataTypeContent->display_layout) && $dataTypeContent->display_layout == 'text') selected="selected"@endif>Text Swatch</option>
@@ -181,7 +183,7 @@
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                              <input class="form-control" type="number" name="order" id="" value="">
+                              <input class="form-control" type="number" name="order" id="" value="{{ $dataTypeContent->order ?? '' }}">
                             </div>
                         </div>
                     </div>
@@ -191,31 +193,38 @@
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                               
+                                <input type="hidden" x-model="selectedIds" name="category_id">
+                               <ul class="attribute-categories">
+                                    <template x-for="(level,i) in categories" :key="i">
+                                        <li x-html="renderLevel(level,i)"></li>
+                                    </template>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-        @section('submit-buttons')
-            <button type="submit" class="btn btn-primary pull-right">
-                @if ($edit)
-                    {{ trans('product-attributes.Update attribute') }}
-                @else
-                    <i class="icon wb-plus-circle"></i> {{ trans('product-attributes.Create new attribute') }}
-                @endif
-            </button>
-        @stop
-        @yield('submit-buttons')
-    </form>
+            @section('submit-buttons')
+                <button type="submit" class="btn btn-primary pull-right">
+                    @if ($edit)
+                        {{ trans('product-attributes.Update attribute') }}
+                    @else
+                        <i class="icon wb-plus-circle"></i> {{ trans('product-attributes.Create new attribute') }}
+                    @endif
+                </button>
+            @stop
+            @yield('submit-buttons')
+        </form>
 
-    <div style="display:none">
-        <input type="hidden" id="upload_url" value="{{ route('voyager.upload') }}">
-        <input type="hidden" id="upload_type_slug" value="{{ $dataType->slug }}">
+        <div style="display:none">
+            <input type="hidden" id="upload_url" value="{{ route('voyager.upload') }}">
+            <input type="hidden" id="upload_type_slug" value="{{ $dataType->slug }}">
+        </div>
+        @include('components.alert')
     </div>
-</div>
+
+
 
 <div class="modal fade modal-danger" id="confirm_delete_modal">
     <div class="modal-dialog">
@@ -248,21 +257,47 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('product_attributes', () => ({
-            name_attribute: '',
-            slug_attribute: '',
+            name_attribute: '{{ $dataTypeContent->name ?? '' }}',
+            slug_attribute: '{{ $dataTypeContent->slug ?? '' }}',
             rows: [],
-            check() {
-                console.log(this.rows)
-            },
+            categories: {!! $categoryTreeJson !!},
+            selectedIds:[],
+            alertMessage: '',
+            alert: false,
             init() {
-                this.rows = [{
-                    is_default: '',
-                    name: '',
-                    slug: '',
-                    color: '',
-                    image: ''
-                }];
+                let idCategories = `{!! $dataTypeContent->category_id !!}`;
+                let attributes_list = `{!! $dataTypeContent->attributes_list !!}`;
+                this.rows = attributes_list ? JSON.parse(attributes_list) : [{is_default: '', name: '',slug: '',color: '',image: ''}]
+                this.selectedIds = idCategories ? idCategories.split(',').map((num)=>{ 
+                        return parseInt(num) 
+                    }) : []
             },
+
+            // category
+            renderLevel(level,index){
+                let html = `<div class="tree-categories" style="margin-bottom: 5px;">
+                                <input x-on:change="toggleSelection(level.id)" x-bind:checked="selectedIds.includes(level.id)" type="checkbox">
+                                <span x-text="level.name"></span>
+                            </div>`;
+                if(level.children) {
+                    html += `<ul class="attribute-categories">
+                                <template x-for='(level,i) in level.children'>
+                                    <li x-html="renderLevel(level,i)"></li>
+                                </template>
+                            </ul>`;
+                }
+                return html;
+            },
+            toggleSelection(id) {
+                const index = this.selectedIds.indexOf(id);
+                if (index === -1) {
+                    this.selectedIds.push(id);
+                } else {
+                    this.selectedIds.splice(index, 1);
+                }
+                // console.log(this.selectedIds)
+            },
+            // end category
             addNewRowAttribute() {
                 this.rows.push({
                     is_default: '',
@@ -273,6 +308,7 @@
                 })
             },
             loadFile(event, index) {
+                this.alert = false
                 let output = document.getElementById(`output-image-${index}`);
                 const image = event.target.files[0];
                 if (image) {
@@ -298,7 +334,12 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        if(data.success == false){
+                            this.alertMessage = data.message
+                            this.alert = true
+                        }
                         this.rows[index].image = data.path;
+                        
                     })
                     .catch(error => {
                         console.error('Lỗi khi tải lên:', error);

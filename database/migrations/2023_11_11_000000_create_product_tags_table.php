@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('product_tags', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
-            $table->string('status');
+            $table->text('description')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

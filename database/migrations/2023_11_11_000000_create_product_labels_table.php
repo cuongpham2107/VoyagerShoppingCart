@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('product_labels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('color');
-            $table->string('status');
+            $table->string('color')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

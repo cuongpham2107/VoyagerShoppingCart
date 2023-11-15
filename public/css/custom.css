@@ -23,7 +23,7 @@
 .panel-title{
     font-size: 16px;
     font-weight: 600;
-    color: #2663d4;
+    color: #3c2b2b;
     padding: 15px 30px 10px 15px !important;
 }
 table.table-attributes thead th{
@@ -31,7 +31,13 @@ table.table-attributes thead th{
     color: white;
     font-weight: 600;
 }
-
+.voyager .panel {
+    border: 1px solid #d0ced1 !important;
+}
+.btn-link, .checkbox label, .checkbox-inline, .radio label, .radio-inline, label{
+    font-weight: 600;
+    color: #444;
+}
 
 
 /* admin */
@@ -126,64 +132,97 @@ table.table-attributes thead th{
 
 /* Categories */
 
-.category-body-tree-list{
-   
-    /* background-color: #edf2f7; */
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    /* padding: 1.25rem; */
-}
-.tree-list{
-    border-radius: 1rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    width: 100%;
-    background-color: #ffffff;
-    padding: 1.25rem;
-    color: #4a5568;
-}
-.tree-list .title-tree-list{
-    font-size: 1.875rem;
-    font-weight: 600;
-    line-height: 1.25;
-    color: #4f46e5;
-}
-.tree-list hr{
-    margin-top: 1.25rem;
-    margin-bottom: 1.25rem;
-    margin-left: 1.25rem;
-    margin-right: 1.25rem;
-}
-.tree-list-data{
-    margin-left: -1.25rem; /* 20px */
-    margin-right: -1.25rem; /* 20px */
-}
-
-.tree-list-data .tree-title{
-    display: block;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    color: #475569;
-    font-weight: 600;
-}
-.tree-list-data .tree-title:hover{
-    color: #333333;
-}
-.tree-list-data .tree-title .has-children{
-    color: #f97316;
-}
-.tree-list-data .tree-title .level-children{
-    color: #4b5563;
-}
-.tree-list-data .ul-level-children{
-    padding-left: 1.25rem; 
-    padding-bottom: 0.25rem; 
-    transition-property: all;
-    transition-duration: 1000ms; 
-    opacity: 1;
-    list-style: none;
-   
+    .category-body-tree-list{
     
-}
+        /* background-color: #edf2f7; */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        /* padding: 1.25rem; */
+    }
+    .tree-list{
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        width: 100%;
+        background-color: #ffffff;
+        padding: 1.25rem;
+        color: #4a5568;
+    }
+    .tree-list .title-tree-list{
+        font-size: 1.875rem;
+        font-weight: 600;
+        line-height: 1.25;
+        color: #4f46e5;
+    }
+    .tree-list hr{
+        margin-top: 1.25rem;
+        margin-bottom: 1.25rem;
+        margin-left: 1.25rem;
+        margin-right: 1.25rem;
+    }
+    .tree-list-data{
+        margin-left: -1.25rem; /* 20px */
+        margin-right: -1.25rem; /* 20px */
+    }
+
+    .tree-list-data .tree-title{
+        display: block;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+        color: #475569;
+        font-weight: 600;
+    }
+    .tree-list-data .tree-title:hover{
+        color: #333333;
+    }
+    .tree-list-data .tree-title .has-children{
+        color: #f97316;
+    }
+    .tree-list-data .tree-title .level-children{
+        color: #4b5563;
+    }
+    .tree-list-data .ul-level-children{
+        padding-left: 1.25rem; 
+        padding-bottom: 0.25rem; 
+        transition-property: all;
+        transition-duration: 1000ms; 
+        opacity: 1;
+        list-style: none;
+    }
+
+
+    /* option */
+    .option-value{
+        list-style: none;
+    }
+    .option-value li {
+        margin-bottom: 5px;
+        border: 1px solid blue;
+        border-radius: 15px;
+        max-width: max-content;
+        padding: 2px 10px 2px 10px;
+        background: #010101;
+        color: white;
+        font-weight: 600;
+        box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+    }
+
+
+    /* attribute */
+    .attribute-categories{
+        list-style: none;
+        margin-bottom: 10px;
+        margin-left: -15px;
+    }
+    .attribute-categories tree-categories{
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        
+    }
+    .attribute-categories tree-list input{
+       margin: 0;
+       margin-right: 5px;
+    }

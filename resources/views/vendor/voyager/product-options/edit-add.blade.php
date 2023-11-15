@@ -94,7 +94,7 @@
                                             </select>    
                                         </td>
                                         <td class="text-center" style="padding-top: 15px;">
-                                            <a @click="deleteRow(index)">
+                                            <a @click="deleteRowOption(index)">
                                                 <svg class="delete-product-attribute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;">
                                                     <path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path>
                                                 </svg>
@@ -105,7 +105,7 @@
                                     </template>
                                 </tbody>
                             </table>
-                            <a class="btn btn-primary" @click='addNewRowAttribute'>{{ trans('product-options.Add new row') }}</a>
+                            <a class="btn btn-primary" @click='addNewRowOption'>{{ trans('product-options.Add new row') }}</a>
                             <input type="hidden" name="option_value" x-model='JSON.stringify(rows)'>
                         </div>
                     </div><!-- .panel -->
@@ -193,10 +193,10 @@
                     let optionValue = `{!! $dataTypeContent->option_value !!}`;
                     this.rows = optionValue ? JSON.parse(optionValue) : [{ label: '', price: '', priceType: 'fixed' }]
                 },
-                addNewRowAttribute(){
+                addNewRowOption(){
                     this.rows.push({label:'',price:'',priceType: 'fixed'})
                 },
-                deleteRow(index) {
+                deleteRowOption(index) {
                     this.rows = this.rows.filter((item, i) => i !== index);
                 }
               

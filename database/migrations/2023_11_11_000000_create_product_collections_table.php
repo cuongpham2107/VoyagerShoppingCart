@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('product_collections', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description');
-            $table->string('product_id');
+            $table->text('description')->nullable();
+            $table->string('product_id')->nullable();
             $table->string('status');
-            $table->string('is_featured');
-            $table->text('image');
+            $table->string('is_featured')->nullable();
+            $table->text('image')->nullable();
             $table->timestamps();
         });
     }

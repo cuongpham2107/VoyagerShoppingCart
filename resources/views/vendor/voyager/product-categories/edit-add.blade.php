@@ -1,7 +1,28 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
-    $categories = \App\Models\ProductCategory::with('children')->select('id','name','parent_id','order')->get();
+    $categories = \App\Models\ProductCategory::select('id','name','parent_id','order')->get();
+
+    function buildCategoryTree($categories, $parent_id = null) {
+        $categoryTree = [];
+
+        foreach ($categories as $category) {
+            if ($category['parent_id'] === $parent_id) {
+                $children = buildCategoryTree($categories, $category['id']);
+                if ($children) {
+                    $category['children'] = $children;
+                }
+                $categoryTree[] = $category;
+            }
+        }
+
+        return $categoryTree;
+    }
+
+    $categoryTree = buildCategoryTree($categories);
+// dd($categoryTree);
+$categoryTreeJson = json_encode($categoryTree, JSON_PRETTY_PRINT);
+
 @endphp
 
 @extends('voyager::master')
@@ -28,11 +49,11 @@
                 
                 <div class="category-body-tree-list">
                     <div class="tree-list" >
-                        <h1 class="title-tree-list">List Categories</h1>
+                        <h1 class="title-tree-list">{{ trans('product-categories.List Categories') }}</h1>
                         <hr>
                         <div class="tree-list-data" x-data="fileTree()">
                             <ul style="list-style: none;">
-                                <template x-for="(level,i) in levels">
+                                <template x-for="(level,i) in categories">
                                     <li x-html="renderLevel(level,i)"></li>
                                 </template>
                             </ul>
@@ -97,6 +118,7 @@
                                     @elseif (isset($row->details->view))
                                         @include($row->details->view, ['row' => $row, 'dataType' => $dataType, 'dataTypeContent' => $dataTypeContent, 'content' => $dataTypeContent->{$row->field}, 'action' => ($edit ? 'edit' : 'add'), 'view' => ($edit ? 'edit' : 'add'), 'options' => $row->details])
                                     @elseif ($row->type == 'relationship')
+                                        {{-- @dd($row->details) --}}
                                         @include('voyager::formfields.relationship', ['options' => $row->details])
                                     @else
                                         {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
@@ -157,256 +179,58 @@
 @stop
 
 @section('javascript')
-<script>
-        let fileTree = function() {
-        return {
-            categories: `{!! $categories !!}`,
-            levels: [
-                {
-                    title: 'AlphineJS',
-                    children: [
-                        {
-                            title: 'LICENSE.md',
-                        },
-                        {
-                            title: 'README.ja.md',
-                        },
-                        {
-                            title: 'README.md',
-                        },
-                        {
-                            title: 'README.ru.md',
-                        },
-                        {
-                            title: 'README_zh-TW.md',
-                        },
-                        {
-                            title: 'babel.config.js',
-                        },
-                        {
-                            title: 'dist/',
-                            children: [
-                                {
-                                    title: 'alpine-ie11.js',
-                                },
-                                {
-                                    title: 'alpine.js',
-                                },
-                            ],
-                        },
-                        {
-                            title: 'examples/',
-                            children: [
-                                {
-                                    title: 'card-game.html',
-                                },
-                                {
-                                    title: 'index.html',
-                                },
-                                {
-                                    title: 'tags.html',
-                                },
-                            ],
-                        },
-                        {
-                            title: 'jest.config.js',
-                        },
-                        {
-                            title: 'package-lock.json',
-                        },
-                        {
-                            title: 'package.json',
-                        },
-                        {
-                            title: 'rollup-ie11.config.js',
-                        },
-                        {
-                            title: 'rollup.config.js',
-                        },
-                        {
-                            title: 'src/',
-                            children: [
-                                {
-                                    title: 'component.js',
-                                },
-                                {
-                                    title: 'directives/',
-                                    children: [
-                                        {
-                                            title: 'bind.js',
-                                        },
-                                        {
-                                            title: 'for.js',
-                                        },
-                                        {
-                                            title: 'html.js',
-                                        },
-                                        {
-                                            title: 'if.js',
-                                        },
-                                        {
-                                            title: 'model.js',
-                                        },
-                                        {
-                                            title: 'on.js',
-                                        },
-                                        {
-                                            title: 'show.js',
-                                        },
-                                        {
-                                            title: 'text.js',
-                                        },
-                                    ],
-                                },
-                                {
-                                    title: 'index.js',
-                                },
-                                {
-                                    title: 'observable.js',
-                                },
-                                {
-                                    title: 'polyfills.js',
-                                },
-                                {
-                                    title: 'utils.js',
-                                },
-                            ],
-                        },
-                        {
-                            title: 'test/',
-                            children: [
-                                {
-                                    title: 'bind.spec.js',
-                                },
-                                {
-                                    title: 'cloak.spec.js',
-                                },
-                                {
-                                    title: 'constructor.spec.js',
-                                },
-                                {
-                                    title: 'custom-magic-properties.spec.js',
-                                },
-                                {
-                                    title: 'data.spec.js',
-                                },
-                                {
-                                    title: 'debounce.spec.js',
-                                },
-                                {
-                                    title: 'dispatch.spec.js',
-                                },
-                                {
-                                    title: 'el.spec.js',
-                                },
-                                {
-                                    title: 'for.spec.js',
-                                },
-                                {
-                                    title: 'html.spec.js',
-                                },
-                                {
-                                    title: 'if.spec.js',
-                                },
-                                {
-                                    title: 'lifecycle.spec.js',
-                                },
-                                {
-                                    title: 'model.spec.js',
-                                },
-                                {
-                                    title: 'mutations.spec.js',
-                                },
-                                {
-                                    title: 'nesting.spec.js',
-                                },
-                                {
-                                    title: 'next-tick.spec.js',
-                                },
-                                {
-                                    title: 'on.spec.js',
-                                },
-                                {
-                                    title: 'readonly.spec.js',
-                                },
-                                {
-                                    title: 'ref.spec.js',
-                                },
-                                {
-                                    title: 'show.spec.js',
-                                },
-                                {
-                                    title: 'spread.spec.js',
-                                },
-                                {
-                                    title: 'strict-mode.spec.js',
-                                },
-                                {
-                                    title: 'text.spec.js',
-                                },
-                                {
-                                    title: 'transition.spec.js',
-                                },
-                                {
-                                    title: 'utils.spec.js',
-                                },
-                                {
-                                    title: 'version.spec.js',
-                                },
-                                {
-                                    title: 'watch.spec.js',
-                                },
-                            ],
-                        },
-                    ],
+    <script>
+            let fileTree = function() {
+            return {
+                categories: {!! $categoryTreeJson !!},
+                // levels: outputCategories
+
+                renderLevel: function(obj,i){
+                    let ref = 'l'+Math.random().toString(36).substring(7);
+                    let html = `<a href="#" class="tree-title" :class="{'has-children':level.children}" x-html="(level.children ? '<i class=\\'mdi mdi-folder-outline has-children\\' ></i>':'<i class=\\'mdi mdi-file-outline level-children\\'></i>')+' '+level.name" ${obj.children?`  @click.prevent="toggleLevel($refs.${ref})"`:''}></a>`;
+
+                    if(obj.children) {
+                        html += `<ul style="display:block;" x-ref="${ref}" class="ul-level-children">
+                                <template x-for='(level,i) in level.children'>
+                                    <li x-html="renderLevel(level,i)"></li>
+                                </template>
+                            </ul>`;
+                    }
+                    return html;
                 },
-            ],
-            renderLevel: function(obj,i){
-                let ref = 'l'+Math.random().toString(36).substring(7);
-                let html = `<a href="#" class="tree-title" :class="{'has-children':level.children}" x-html="(level.children ? '<i class=\\'mdi mdi-folder-outline has-children\\' ></i>':'<i class=\\'mdi mdi-file-outline level-children\\'></i>')+' '+level.title" ${obj.children?`  @click.prevent="toggleLevel($refs.${ref})"`:''}></a>`;
+                showLevel: function(el) {
+                    if (el.style.length === 1 && el.style.display === 'none') {
+                        el.removeAttribute('style')
+                    } else {
+                        el.style.removeProperty('display')
+                    }
+                    setTimeout(()=>{
+                        el.previousElementSibling.querySelector('i.mdi').classList.add("mdi-folder-open-outline");
+                        el.previousElementSibling.querySelector('i.mdi').classList.remove("mdi-folder-outline");
+                        el.style.opacity = '1';
+                    },10)
+                },
+                hideLevel: function(el) {
+                    el.style.display = 'none';
+                    el.style.opacity = '0';
+                    el.previousElementSibling.querySelector('i.mdi').classList.remove("mdi-folder-open-outline");
+                    el.previousElementSibling.querySelector('i.mdi').classList.add("mdi-folder-outline");
 
-                if(obj.children) {
-                    html += `<ul style="display:block;" x-ref="${ref}" class="ul-level-children">
-                            <template x-for='(level,i) in level.children'>
-                                <li x-html="renderLevel(level,i)"></li>
-                            </template>
-                        </ul>`;
-                }
-                return html;
-            },
-            showLevel: function(el) {
-                if (el.style.length === 1 && el.style.display === 'none') {
-                    el.removeAttribute('style')
-                } else {
-                    el.style.removeProperty('display')
-                }
-                setTimeout(()=>{
-                    el.previousElementSibling.querySelector('i.mdi').classList.add("mdi-folder-open-outline");
-                    el.previousElementSibling.querySelector('i.mdi').classList.remove("mdi-folder-outline");
-                    el.style.opacity = '1';
-                },10)
-            },
-            hideLevel: function(el) {
-                el.style.display = 'none';
-                el.style.opacity = '0';
-                el.previousElementSibling.querySelector('i.mdi').classList.remove("mdi-folder-open-outline");
-                el.previousElementSibling.querySelector('i.mdi').classList.add("mdi-folder-outline");
-
-                let refs = el.querySelectorAll('ul[x-ref]');
-                for (var i = 0; i < refs.length; i++) {
-                    this.hideLevel(refs[i]);
-                }
-            },
-            toggleLevel: function(el) {
-                if( el.style.length && el.style.display === 'none' ) {
-                    this.showLevel(el);
-                } else {
-                    this.hideLevel(el);
+                    let refs = el.querySelectorAll('ul[x-ref]');
+                    for (var i = 0; i < refs.length; i++) {
+                        this.hideLevel(refs[i]);
+                    }
+                },
+                toggleLevel: function(el) {
+                    if( el.style.length && el.style.display === 'none' ) {
+                        this.showLevel(el);
+                    } else {
+                        this.hideLevel(el);
+                    }
                 }
             }
         }
-    }
-</script>
+    </script>
     <script>
         var params = {};
         var $file;

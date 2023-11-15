@@ -1,0 +1,20 @@
+<?php
+return [
+  "Name"                    =>  "Name",
+  "Description"             =>  "Description",
+  "Images"                  =>  "Images",
+  "Overview"                =>  "Overview",
+  "Attributes"              =>  "Attributes",
+  "Options"                 =>  "Options",
+  "Status"                  =>  "Status",
+  "Is featured?"            =>  "Is featured?",
+  "Brands"                  =>  "Brands",
+  "Featured image"          =>  "Featured image",
+  "Category"                =>  "Category",
+  "Collections"             =>  "Collections",
+  "Labels"                  =>  "Labels",
+  "Taxes"                   =>  "Taxes",
+  "Tag"                     =>  "Tag",
+  "Create new products"     =>  "Create new products",
+  "Update products"         =>  "Update products",
+];
