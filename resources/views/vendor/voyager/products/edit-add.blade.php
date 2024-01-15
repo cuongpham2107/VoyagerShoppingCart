@@ -1,10 +1,10 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add = is_null($dataTypeContent->getKey());
-    $product_collections = App\Models\ProductCollection::where('status','published')->get();
-    $product_labels = App\Models\ProductLabel::where('status','published')->get();
-    $product_taxes = App\Models\ProductTax::where('status','published')->get();
-    $attributes =  App\Models\ProductAttribute::where('status','published')->get();
+    $product_collections = App\Models\ProductCollection::where('status', 'published')->get();
+    $product_labels = App\Models\ProductLabel::where('status', 'published')->get();
+    $product_taxes = App\Models\ProductTax::where('status', 'published')->get();
+    $attributes = App\Models\ProductAttribute::where('status', 'published')->select('id','name','slug')->get();
     $options = App\Models\ProductOption::get();
     // dd($options);
 @endphp
@@ -51,11 +51,11 @@
                             </div>
                         @endif
                         @php
-                            $dataTypeRows = $dataType->{($edit ? 'editRows' : 'addRows' )};
+                            $dataTypeRows = $dataType->{$edit ? 'editRows' : 'addRows'};
                         @endphp
-                        
+
                         @foreach ($dataTypeRows as $row)
-                            @if($row->type == 'text' && $row->field == 'name')
+                            @if ($row->type == 'text' && $row->field == 'name')
                                 <div class="panel-heading">
                                     <h3 class="panel-title">
                                         {{ $row->getTranslatedAttribute('display_name') }}
@@ -70,7 +70,7 @@
                                         {{ $row->getTranslatedAttribute('display_name') }}
                                     </h3>
                                 </div>
-                            
+
                                 <div class="panel-body">
                                     {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
                                 </div>
@@ -84,7 +84,6 @@
                                     {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
                                 </div>
                             @endif
-                            
                         @endforeach
                     </div>
                     <div class="panel">
@@ -95,27 +94,50 @@
                         </div>
                         <div class="panel-body">
                             @foreach ($dataTypeRows as $row)
-                            @php
-                                $display_options = $row->details->display ?? NULL;
-                                
-                            @endphp
-                                @if($row->type == 'number' 
-                                ||  $row->type == 'text' && $row->field == 'sku' 
-                                ||  $row->type == 'text' && $row->field == 'barcode'
-                                ||  $row->type == 'select_dropdown' && $row->field == 'stock_status')
-                                
-                                        <div class="form-group @if($row->type == 'hidden') hidden @endif col-md-{{ $display_options->width ?? 12 }} {{ $errors->has($row->field) ? 'has-error' : '' }}" @if(isset($display_options->id)){{ "id=$display_options->id" }}@endif>
-                                        <label class="control-label" for="name">{{ $row->getTranslatedAttribute('display_name') }}</label>
+                                @php
+                                    $display_options = $row->details->display ?? null;
+
+                                @endphp
+                                @if (
+                                    $row->type == 'number' ||
+                                        ($row->type == 'text' && $row->field == 'sku') ||
+                                        ($row->type == 'text' && $row->field == 'barcode') ||
+                                        ($row->type == 'select_dropdown' && $row->field == 'stock_status'))
+                                    <div class="form-group @if ($row->type == 'hidden') hidden @endif col-md-{{ $display_options->width ?? 12 }} {{ $errors->has($row->field) ? 'has-error' : '' }}"
+                                        @if (isset($display_options->id)) {{ "id=$display_options->id" }} @endif>
+                                        <label class="control-label"
+                                            for="name">{{ $row->getTranslatedAttribute('display_name') }}</label>
                                         {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
-                                        </div>
-                                    
-                                @endif  
+                                    </div>
+                                @endif
                             @endforeach
                         </div>
                     </div>
+                    <style>
+                        .table-attributes {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+
+                        .table-attributes td {
+                            border: 1px solid #ddd;
+                            padding: 8px;
+                            text-align: center !important;
+                            /* Căn giữa theo chiều ngang */
+                            vertical-align: middle !important;
+                            /* Căn giữa theo chiều dọc */
+                        }
+
+                        .panel-heading a {
+                            font-size: 14px;
+                            font-weight: 600;
+                            padding: 15px 30px 10px 15px !important;
+                        }
+                    </style>
                     <div class="panel ">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">{{ trans('products.Attributes') }}</h3>
+                        <div class="panel-heading" style="display: flex; justify-content: space-between">
+                            <h3 class="panel-title">Product has variations</h3>
+                            <a href="#" data-toggle="modal" data-target=".bs-example-modal-sm">Edit attribute</a>
                         </div>
 
                         <div class="panel-body">
@@ -123,84 +145,82 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col" style="width:10%">{{ trans('product-attributes.Is default?') }}</th>
-                                        <th scope="col">{{ trans('product-attributes.TITLE') }}</th>
-                                        <th scope="col">{{ trans('product-attributes.SLUG') }}</th>
-                                        <th scope="col">{{ trans('product-attributes.COLOR') }}</th>
-                                        <th scope="col">{{ trans('product-attributes.IMAGE') }}</th>
-                                        <th scope="col">{{ trans('product-attributes.REMOVE') }}</th>
+                                        <th scope="col">IMAGE</th>
+                                        <template x-for="(attr , index) in selectedAttributes">
+                                            <th scope="col" x-text="attr"></th>
+                                        </template>
+                                        <th scope="col">PRICE</th>
+                                        <th scope="col">IS DEFAULT</th>
+                                        <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template x-for="(row, index) in rowAttributes" :key="index">
-                                        <tr>
-                                            <th class="text-center" style="padding-top: 15px;">
-                                                <p x-text="index">#</p>
-                                            </th>
-                                            <td>
-                                                <input x-model="row.is_default" class="input-table-product-attribute"
-                                                    type="checkbox" style="margin-top: 13px;">
-                                            </td>
-                                            <td>
-                                                <input x-model="row.name" class="input-table-product-attribute"
-                                                    type="text">
-                                            </td>
-                                            <td>
-                                                <input x-model="row.slug" class="input-table-product-attribute"
-                                                    type="text">
-                                            </td>
-                                            <td>
-                                                <div id="color-picker">
-                                                    <span class="picker">
-                                                        <input class="colorPick" x-model="row.color" type="color"
-                                                            value="#FFFFFF">
-                                                    </span>
-                                                </div>
+                                    <tr>
+                                        <th class="text-center" style="padding-top: 15px;">
 
+                                            <div>
+                                                <span>1</span>
+                                            </div>
+                                        </th>
+                                        <td style="width: 10%">
+
+                                            <div>
+                                                <img src="https://edutalk.edu.vn/_nuxt/assets/images/default.jpg"
+                                                    alt="" width="50" height="50">
+                                            </div>
+                                        </td>
+                                        <template x-for="(attr , index) in selectedAttributes">
+                                            <td style="width: 15%">
+                                                <div>
+                                                    <span>Red</span>
+                                                </div>
                                             </td>
-                                            <td>
-                                                <label x-bind:for="'uploadImage-' + index">
-                                                    <img x-bind:id="'output-image-' + index"
-                                                        x-bind:src="row.image ? `{{ Voyager::image('${row.image}') }}` : 'https://edutalk.edu.vn/_nuxt/assets/images/default.jpg'"
-                                                        src="https://edutalk.edu.vn/_nuxt/assets/images/default.jpg"
-                                                        alt="" width="35" height="35"
-                                                        style="width: max-content;
-                                                        object-fit: cover;
-                                                        margin-left: 15px;"
-                                                        >
-                                                </label>
-                                                <input x-on:change.debounce="loadFile($event,index)" type="file"
-                                                    x-bind:id="'uploadImage-' + index" style="display:none;" value=''>
-                                                <input x-model="row.image" type="text" x-bind:id="'imageName-' + index"
-                                                    style="display:none;">
-                                            </td>
-                                            <td class="text-center" style="padding-top: 15px;">
-                                                <a @click="deleteRowAttribute(index)">
-                                                    <svg class="delete-product-attribute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;">
-                                                        <path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path>
+                                        </template>
+                                        <td style="width: 10%">
+
+                                            <div>
+                                                <input type="number" name="" id="">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <input type="checkbox" name="" id="">
+                                            </div>
+                                        </td>
+                                        <td style="width: 25%">
+                                            <div>
+                                                <a href="#" class="btn btn-primary" data-toggle="modal"
+                                                    data-target=".bs-example-modal-lg">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24"
+                                                        style="fill: rgb(255, 255, 255);transform: ;msFilter:;">
+                                                        <path
+                                                            d="m18.988 2.012 3 3L19.701 7.3l-3-3zM8 16h3l7.287-7.287-3-3L8 13z">
+                                                        </path>
+                                                        <path
+                                                            d="M19 19H8.158c-.026 0-.053.01-.079.01-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .896-2 2v14c0 1.104.897 2 2 2h14a2 2 0 0 0 2-2v-8.668l-2 2V19z">
+                                                        </path>
                                                     </svg>
                                                 </a>
-                                            </td>
-                                        </tr>
-                                    </template>
+                                                <a href="#" class="btn btn-danger">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24"
+                                                        style="fill: rgb(255, 255, 255);transform: ;msFilter:;">
+                                                        <path
+                                                            d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm10.618-3L15 2H9L7.382 4H3v2h18V4z">
+                                                        </path>
+                                                    </svg>
+                                                </a>
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
                                 </tbody>
                             </table>
                             <div style="display: flex;justify-content: space-between;align-items: center;">
-                                <a class="btn btn-primary" @click='addNewRowAttribute'>{{ trans('product-attributes.Add new row') }}</a>
-                                <div style="display: flex;align-items: center;">
-                                    <div class="">
-                                        <select class="form-control" x-model="selected_available_attribute">
-                                            <option value="">Attributes</option>
-                                            @foreach ($attributes as $item)
-                                                <option value="{{$item->attributes_list}}">{{$item->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <a style="margin-left: 10px" class="btn btn-primary" @click='SelectAvailableAttributes'>{{ trans('product-attributes.Select available Attributes') }}</a>
-                                </div>
-                               
+                                <a class="btn btn-primary" @click='addNewVariation'>Add new variation</a>
                             </div>
-                            <input type="hidden" name="product_attributes" x-model='JSON.stringify(rowAttributes)'>
                         </div>
                     </div>
                     <div class="panel ">
@@ -211,63 +231,76 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                      <th scope="col">#</th>
-                                      <th scope="col">{{ trans('product-options.Label') }}</th>
-                                      <th scope="col">{{ trans('product-options.Price') }}</th>
-                                      <th scope="col">{{ trans('product-options.Price Type') }}</th>
+                                        <th scope="col">#</th>
+                                        <th scope="col">{{ trans('product-options.Label') }}</th>
+                                        <th scope="col">{{ trans('product-options.Price') }}</th>
+                                        <th scope="col">{{ trans('product-options.Price Type') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <template x-for="(row, index) in rowOptions" :key="index">
-                                    <tr>
-                                        <th class="text-center" style="padding-top: 15px;">
-                                            <span x-text="index+1"></span>
-                                        </th>
-                                        <td>
-                                            <input x-model="row.label" class="input-table-product-attribute" type="text"  id="" placeholder="{{ trans('product-options.Placeholder Label') }}">
-                                        </td>
-                                        <td>
-                                            <input x-model="row.price" class="input-table-product-attribute" type="number"  id="" placeholder="{{ trans('product-options.Placeholder Price') }}">
-                                        </td>
-                                        <td>
-                                            <select x-model="row.priceType" class="select-table-product-attribute" id="">
-                                                <template x-for="type in priceTypes">
-                                                    <option x-bind:value="type" x-text="type.charAt(0).toUpperCase() + type.slice(1)"></option>
-                                                </template>
-                                            </select>    
-                                        </td>
-                                        <td class="text-center" style="padding-top: 15px;">
-                                            <a @click="deleteRowOption(index)">
-                                                <svg class="delete-product-attribute" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;">
-                                                    <path d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z"></path>
-                                                </svg>
-                                            </a>
-                                            
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <th class="text-center" style="padding-top: 15px;">
+                                                <span x-text="index+1"></span>
+                                            </th>
+                                            <td>
+                                                <input x-model="row.label" class="input-table-product-attribute"
+                                                    type="text" id=""
+                                                    placeholder="{{ trans('product-options.Placeholder Label') }}">
+                                            </td>
+                                            <td>
+                                                <input x-model="row.price" class="input-table-product-attribute"
+                                                    type="number" id=""
+                                                    placeholder="{{ trans('product-options.Placeholder Price') }}">
+                                            </td>
+                                            <td>
+                                                <select x-model="row.priceType" class="select-table-product-attribute"
+                                                    id="">
+                                                    <template x-for="type in priceTypes">
+                                                        <option x-bind:value="type"
+                                                            x-text="type.charAt(0).toUpperCase() + type.slice(1)"></option>
+                                                    </template>
+                                                </select>
+                                            </td>
+                                            <td class="text-center" style="padding-top: 15px;">
+                                                <a @click="deleteRowOption(index)">
+                                                    <svg class="delete-product-attribute"
+                                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24"
+                                                        style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;">
+                                                        <path
+                                                            d="M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm4 12H8v-9h2v9zm6 0h-2v-9h2v9zm.618-15L15 2H9L7.382 4H3v2h18V4z">
+                                                        </path>
+                                                    </svg>
+                                                </a>
+
+                                            </td>
+                                        </tr>
                                     </template>
                                 </tbody>
                             </table>
-                           
+
                             <div style="display: flex;justify-content: space-between;align-items: center;">
-                                <a class="btn btn-primary" @click='addNewRowOption'>{{ trans('product-options.Add new row') }}</a>
+                                <a class="btn btn-primary"
+                                    @click='addNewRowOption'>{{ trans('product-options.Add new row') }}</a>
                                 <div style="display: flex;align-items: center;">
                                     <div class="">
                                         <select class="form-control" x-model="selected_available_option">
                                             <option value="">Option</option>
                                             @foreach ($options as $item)
-                                                <option value="{{$item->option_value}}">{{$item->name}}</option>
+                                                <option value="{{ $item->option_value }}">{{ $item->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <a style="margin-left: 10px" class="btn btn-primary" @click='SelectAvailableOptions'>{{ trans('product-options.Select available Options') }}</a>
+                                    <a style="margin-left: 10px" class="btn btn-primary"
+                                        @click='SelectAvailableOptions'>{{ trans('product-options.Select available Options') }}</a>
                                 </div>
-                               
+
                             </div>
                             <input type="hidden" name="product_options" x-model='JSON.stringify(rowOptions)'>
                         </div>
                     </div>
-                    
+
                 </div>
                 <div class="col-md-4">
                     <div class="panel">
@@ -279,7 +312,8 @@
                                 <select class="form-control" name="status">
                                     <option value="published"@if (isset($dataTypeContent->status) && $dataTypeContent->status == 'published') selected="selected" @endif>
                                         Published</option>
-                                    <option value="draft"@if (isset($dataTypeContent->status) && $dataTypeContent->status == 'draft') selected="selected" @endif>Draft
+                                    <option value="draft"@if (isset($dataTypeContent->status) && $dataTypeContent->status == 'draft') selected="selected" @endif>
+                                        Draft
                                     </option>
                                     <option value="pending"@if (isset($dataTypeContent->status) && $dataTypeContent->status == 'pending') selected="selected" @endif>
                                         Pending</option>
@@ -289,13 +323,14 @@
                     </div>
                     <div class="panel ">
                         <div class="panel-heading-botom">
-                            <h3 class="panel-title"><i class="icon wb-clipboard"></i> {{ trans('products.Is featured?') }}
+                            <h3 class="panel-title"><i class="icon wb-clipboard"></i>
+                                {{ trans('products.Is featured?') }}
                             </h3>
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <input type="checkbox" name="is_featured" @if (isset($dataTypeContent->is_featured) && $dataTypeContent->is_featured == 'on') checked @endif
-                                    class="toggleswitch">
+                                <input type="checkbox" name="is_featured"
+                                    @if (isset($dataTypeContent->is_featured) && $dataTypeContent->is_featured == 'on') checked @endif class="toggleswitch">
                             </div>
                         </div>
                     </div>
@@ -307,8 +342,9 @@
                             <div class="form-group">
                                 <select class="form-control" name="brand_id">
                                     @foreach ($brands as $item)
-                                        <option value="{{$item->id}}"@if (isset($dataTypeContent->brand_id) && $dataTypeContent->brand_id == $item->id) selected="selected" @endif>
-                                            {{$item->name}}</option>
+                                        <option
+                                            value="{{ $item->id }}"@if (isset($dataTypeContent->brand_id) && $dataTypeContent->brand_id == $item->id) selected="selected" @endif>
+                                            {{ $item->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -316,7 +352,8 @@
                     </div>
                     <div class="panel">
                         <div class="panel-heading-botom">
-                            <h3 class="panel-title"><i class="icon wb-clipboard"></i> {{ trans('products.Featured image') }}</h3>
+                            <h3 class="panel-title"><i class="icon wb-clipboard"></i>
+                                {{ trans('products.Featured image') }}</h3>
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
@@ -346,7 +383,8 @@
                     </div>
                     <div class="panel">
                         <div class="panel-heading-botom">
-                            <h3 class="panel-title"><i class="icon wb-clipboard"></i> {{ trans('products.Collections') }}</h3>
+                            <h3 class="panel-title"><i class="icon wb-clipboard"></i> {{ trans('products.Collections') }}
+                            </h3>
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
@@ -354,7 +392,9 @@
                                     <input type="hidden" x-model="selectedCollectionIds" name="product_collections">
                                     <template x-for="(collection,i) in collections" :key="i">
                                         <li>
-                                            <input x-on:change="selectionCollections(collection.id)" x-bind:checked="selectedCollectionIds.includes(collection.id)" type="checkbox">
+                                            <input x-on:change="selectionCollections(collection.id)"
+                                                x-bind:checked="selectedCollectionIds.includes(collection.id)"
+                                                type="checkbox">
                                             <span x-text="collection.name"></span>
                                         </li>
                                     </template>
@@ -372,7 +412,8 @@
                                     <input type="hidden" x-model="selectedLabelIds" name="product_labels">
                                     <template x-for="(label,i) in labels" :key="i">
                                         <li>
-                                            <input x-on:change="selectionLabels(label.id)" x-bind:checked="selectedLabelIds.includes(label.id)" type="checkbox">
+                                            <input x-on:change="selectionLabels(label.id)"
+                                                x-bind:checked="selectedLabelIds.includes(label.id)" type="checkbox">
                                             <span x-text="label.name"></span>
                                         </li>
                                     </template>
@@ -390,7 +431,8 @@
                                     <input type="hidden" x-model="selectedTaxIds" name="product_taxes">
                                     <template x-for="(tax,i) in taxes" :key="i">
                                         <li>
-                                            <input x-on:change="selectionTaxes(tax.id)" x-bind:checked="selectedTaxIds.includes(tax.id)" type="checkbox">
+                                            <input x-on:change="selectionTaxes(tax.id)"
+                                                x-bind:checked="selectedTaxIds.includes(tax.id)" type="checkbox">
                                             <span x-text="tax.name"></span>
                                         </li>
                                     </template>
@@ -405,8 +447,10 @@
                         <div class="panel-body">
                             <div class="form-group">
                                 @foreach ($dataTypeRows as $row)
-                                    @if($row->type == 'relationship')
-                                        @include('voyager::formfields.relationship', ['options' => $row->details])
+                                    @if ($row->type == 'relationship')
+                                        @include('voyager::formfields.relationship', [
+                                            'options' => $row->details,
+                                        ])
                                     @endif
                                 @endforeach
                             </div>
@@ -415,22 +459,47 @@
                 </div>
             </div>
 
-        @section('submit-buttons')
-            <button type="submit" class="btn btn-primary pull-right">
-                @if ($edit)
-                    {{ trans('products.Update products') }}
-                @else
-                    <i class="icon wb-plus-circle"></i> {{ trans('products.Create new products') }}
-                @endif
-            </button>
-        @stop
-        @yield('submit-buttons')
-    </form>
+            @section('submit-buttons')
+                <button type="submit" class="btn btn-primary pull-right">
+                    @if ($edit)
+                        {{ trans('products.Update products') }}
+                    @else
+                        <i class="icon wb-plus-circle"></i> {{ trans('products.Create new products') }}
+                    @endif
+                </button>
+            @stop
+            @yield('submit-buttons')
+        </form>
 
     <div style="display:none">
         <input type="hidden" id="upload_url" value="{{ route('voyager.upload') }}">
         <input type="hidden" id="upload_type_slug" value="{{ $dataType->slug }}">
     </div>
+    <!-- Small modal -->
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm" role="document">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="gridSystemModalLabel">Modal title</h4>
+            </div>
+            <div class="modal-body" >
+                <template x-for="(a, i) in attributes" :key="i">  
+                    <div>
+                        <input x-model="selectedAttributes" type="checkbox" :value="a.name">
+                        <span x-text="a.name"></span>
+                    </div>
+                </template>  
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" @click="saveSelectedAttributes">Save changes</button>
+              </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <div class="modal fade modal-danger" id="confirm_delete_modal">
@@ -439,7 +508,8 @@
 
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title"><i class="voyager-warning"></i> {{ __('voyager::generic.are_you_sure') }}</h4>
+                <h4 class="modal-title"><i class="voyager-warning"></i> {{ __('voyager::generic.are_you_sure') }}
+                </h4>
             </div>
 
             <div class="modal-body">
@@ -455,7 +525,49 @@
         </div>
     </div>
 </div>
+<!-- Modal edit variation -->
+<style>
+    .modal-header {
+        background: #48b1f1;
+    }
+
+    .modal-header h4 {
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+    }
+</style>
+<div class="modal fade bs-example-modal-lg" id="exampleModal" tabindex="-1" role="dialog"
+    aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Edit variation</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">Recipient:</label>
+                        <input type="text" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="control-label">Message:</label>
+                        <textarea class="form-control" id="message-text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Send message</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- End Delete File Modal -->
+
+
 {{-- @dd($dataTypeContent) --}}
 @stop
 
@@ -470,33 +582,39 @@
             ],
             categories: {!! $categoryTreeJson !!},
             selectedCategoryIds: [],
-            rowAttributes: [],
             rowOptions: [],
             collections: {!! $product_collections !!},
             selectedCollectionIds: [],
             labels: {!! $product_labels !!},
-            selectedLabelIds:[],
+            selectedLabelIds: [],
             taxes: {!! $product_taxes !!},
-            selectedTaxIds:[],
-            selected_available_attribute: '',
-            selected_available_option:'',
+            selectedTaxIds: [],
+            selected_available_option: '',
+            attributes: [],
+            selectedAttributes:[],
             init() {
                 let idCategories = `{!! $dataTypeContent->categories !!}`;
                 let attributes_list = `{!! $dataTypeContent->product_attributes !!}`;
                 let optionValue = `{!! $dataTypeContent->product_options !!}`;
-
                 let id_product_collection = `{!! $dataTypeContent->product_collections !!}`;
                 let id_product_label = `{!! $dataTypeContent->product_labels !!}`;
                 let id_product_tax = `{!! $dataTypeContent->product_taxes !!}`;
-                this.rowOptions = optionValue ? JSON.parse(optionValue) : [{ label: '', price: '', priceType: 'fixed' }];
-                this.rowAttributes = attributes_list ? JSON.parse(attributes_list) : [{is_default: '', name: '',slug: '',color: '',image: ''}];
+                let a = `{!! $attributes !!}`;
+                this.attributes = JSON.parse(a)
+                this.rowOptions = optionValue ? JSON.parse(optionValue) : [{
+                    label: '',
+                    price: '',
+                    priceType: 'fixed'
+                }];
                 this.selectedCategoryIds = idCategories ? idCategories.split(',').map((num) => {
                     return parseInt(num)
                 }) : [];
-                this.selectedCollectionIds = id_product_collection ? id_product_collection.split(',').map((num) => {
+                this.selectedCollectionIds = id_product_collection ? id_product_collection.split(
+                    ',').map((num) => {
                     return parseInt(num)
                 }) : [];
-                this.selectedLabelIds = id_product_label ? id_product_label.split(',').map((num) => {
+                this.selectedLabelIds = id_product_label ? id_product_label.split(',').map((
+                num) => {
                     return parseInt(num)
                 }) : [];
                 this.selectedTaxIds = id_product_tax ? id_product_tax.split(',').map((num) => {
@@ -528,102 +646,29 @@
                 console.log(this.selectedCategoryIds, index)
 
             },
-            //Attribute
-            addNewRowAttribute() {
-                this.rowAttributes.push({
-                    is_default: '',
-                    name: '',
-                    slug: '',
-                    color: '',
-                    image: ''
-                })
-            },
-            loadFile(event, index) {
-                this.alert = false
-                let output = document.getElementById(`output-image-${index}`);
-                const image = event.target.files[0];
-                if (image) {
-                    this.uploadImage(image, index);
-                }
-                output.src = URL.createObjectURL(event.target.files[0]);
-                output.onload = function() {
-                    URL.revokeObjectURL(output.src);
-                }
-            },
-            uploadImage(image, index) {
-                const formData = new FormData();
-                formData.append('file', image);
-                formData.append("upload_path", 'product-attributes');
-                formData.append("filename", this.renameImage(image.name));
-                formData.append("details", '');
-                fetch('{{ route('voyager.media.upload') }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.success == false){
-                            this.alertMessage = data.message
-                            this.alert = true
-                        }
-                        this.rowAttributes[index].image = data.path;
-                        
-                    })
-                    .catch(error => {
-                        console.error('Lỗi khi tải lên:', error);
-                    });
-            },
-            renameImage(fileName) {
-                return fileName
-                    .toLowerCase()
-                    .replace(/[^\w\s-]/g, '')
-                    .replace(/\s+/g, '-')
-                    .replace(/-+/g, '-')
-                    .replace(/\.[^.]+$/, '')
-            },
-            deleteRowAttribute(index) {
-                if(this.rowAttributes[index].image){
-                    const formData = new FormData();
-                    formData.append('files', this.rowAttributes[index].image);
-                    fetch('{{ route('delete_image_media') }}', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        this.rowAttributes[index].image = data.path;
-                    })
-                    .catch(error => {
-                        console.error('Lỗi khi tải lên:', error);
-                    });
-                }
-                
-                this.rowAttributes = this.rowAttributes.filter((item, i) => i !== index);
-            },
-            SelectAvailableAttributes(){
-              
-                this.rowAttributes = this.selected_available_attribute 
-                    ? JSON.parse(this.selected_available_attribute) 
-                    : [{is_default: '', name: '',slug: '',color: '',image: ''}];
-               
+            //Variation
+            addNewVariation() {
+
             },
             //Option
-            addNewRowOption(){
-                this.rowOptions.push({label:'',price:'',priceType: 'fixed'})
+            addNewRowOption() {
+                this.rowOptions.push({
+                    label: '',
+                    price: '',
+                    priceType: 'fixed'
+                })
             },
             deleteRowOption(index) {
                 this.rowOptions = this.rowOptions.filter((item, i) => i !== index);
             },
-            SelectAvailableOptions(){
-                this.rowOptions = this.selected_available_option
-                    ? JSON.parse(this.selected_available_option) 
-                    : [{ label: '', price: '', priceType: 'fixed' }];
+            SelectAvailableOptions() {
+                this.rowOptions = this.selected_available_option ?
+                    JSON.parse(this.selected_available_option) :
+                    [{
+                        label: '',
+                        price: '',
+                        priceType: 'fixed'
+                    }];
             },
             //Collection 
             selectionCollections(id) {
@@ -646,8 +691,8 @@
                 }
                 console.log(this.selectedLabelIds, index)
             },
-             //Taxes 
-             selectionTaxes(id) {
+            //Taxes 
+            selectionTaxes(id) {
                 const index = this.selectedTaxIds.indexOf(id);
                 if (index === -1) {
                     this.selectedTaxIds.push(id);

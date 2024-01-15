@@ -30,4 +30,5 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
     Route::post('delete_file_folder', ['uses' => 'App\Http\Controllers\Admin\CustomMediaController@delete', 'as' => 'delete_image_media']);
+      
 });

@@ -44,97 +44,199 @@
                                 </ul>
                             </div>
                         @endif
-
+                        
                         <div class="panel-heading">
                             <h3 class="panel-title">
                                 {{ trans('orders.Order information') }}
                             </h3>
                         </div>
-                        <div style="margin: 10px">
-                          <table class="table table-bordered table-order" >
-                            <thead>
-                              <tr>
-                                <th scope="col"></th>
-                                <th scope="col">{{ trans('orders.PRODUCT NAME') }}</th>
-                                <th scope="col">{{ trans('orders.PRICE') }}</th>
-                                <th scope="col">{{ trans('orders.QUANTITY') }}</th>
-                                <th scope="col">{{ trans('orders.TOTAL') }}</th>
-                                <th scope="col">{{ trans('orders.ACTION') }}</th>
-                              </tr>
-                            </thead>
-                            <style>
-                                .table .order-image-table {
-                                    width: 50px;
-                                    object-fit: cover;
-                                }
-                                .table .order-product-name-table{
-                                    text-decoration: none !important;
-                                    font-weight: 500;
-                                }
-                                .table .order-product-description-table{
-                                    font-size: 12px !important;
-                                }
-                                .table-order td{
-                                    width:10%
-                                }
-                                .table-order span{
-                                    font-weight: 600;
-                                    color:#444;
-                                    margin: 0;
-                                    padding-top: 15px;
-                                }
-                                .table-order>thead:first-child>tr:first-child>th{
-                                    font-weight: 400;
-                                    font-size: 12px !important;
-                                    color:#959595;
-                                    
-                                }
-                                .table-order input{
-                                    border-radius: 5px;
-                                    border: 0.5px solid rgb(183, 181, 181);
-                                    padding: 5px 0px 5px 0px;
-                                    width: 60px;
-                                    margin-top: 7px;
-                                    align-items: center;
-                                    display: flex;
-
-                                }
-                                .table-order p{
-                                    align-items: center;
-                                    display: flex;
-                                }
-                            </style>
-                            <tbody>
-                                <template x-for="(test, index) in [1,2,3]" :key="index">
-                                    <tr>
-                                        <th style="width:10%">
-                                            <img class="order-image-table" src="https://edutalk.edu.vn/_nuxt/assets/images/default.jpg" alt="" style="">
-                                        </th>
-                                        <th> 
-                                            <a class="order-product-name-table" href=""> Dual Camera 20MP (Digital) (Global Store)</a>
-                                            <p class="order-product-description-table">(Size: XL, Color: Black)</p>
-                                        </th>
-                                        <td> 
-                                            <p><span>$100.00</span></p>
-                                        </td>
-                                        <td>
-                                          <input type="number" name="quantity" id="" style="width: 70px;">
-                                        </td>
-                                        <td> 
-                                            <p><span>$100.00</span></p>
-                                        </td>
-                                        <td>
-                                          
-                                            <p>  <span>X</span></p>
-                                        </td>
-                                      </tr>
+                       <div class="panel-order" >
+                            <input  @input.debounce="searchProduct($event.target.value)" type="text" name="" id="" class="form-control" placeholder="Search product ...">
+                        <template  x-if="products.length !== 0">
+                            <ul class="list-search-data">
+                                <template x-for="(item, index) in products" :key="index">
+                                    <li class="item-not-selectable">
+                                        <div class="product-wrap">
+                                            <img style="object-fit: cover" :src="imageVoyager(item.featured_image)" width="35" height="35" alt="">
+                                            <span x-text="item.name"></span>
+                                        </div>
+                                        <div>
+                                            <ul>
+                                                <li class="product-variant">
+                                                    <div class="attribute-wrap">
+                                                       <div>
+                                                            <span class="text-success">(Size: XL, Color: Brown)</span>
+                                                            <span> (17 product(s) available) <span class="text-info"> ($61.79)</span></span>
+                                                       </div>
+                                                       <a href="">Add</a>
+                                                    </div>
+                                                    
+                                                </li>
+                                                <li class="product-variant">
+                                                    <div class="attribute-wrap">
+                                                        <div>
+                                                            <span class="text-success">(Size: S, Color: Blue)</span>
+                                                            <span> (17 product(s) available) <span class="text-info"> ($61.79)</span></span>
+                                                       </div>
+                                                       <a href="">Add</a>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li> 
                                 </template>
-                              
-                              
-                            </tbody>
-                          </table>
-                        </div>
-                     
+
+                                <li class="item-not-selectable">
+                                    <div class="product-wrap">
+                                        <img src="https://edutalk.edu.vn/_nuxt/assets/images/default.jpg" width="35" height="35" alt="">
+                                        <span>Dual Camera 20MP (Digital) (GoPro)</span>
+                                    </div>
+                                    <div>
+                                        <ul>
+                                            <li class="product-variant">
+                                                <div class="attribute-wrap">
+                                                   <div>
+                                                        <span class="text-success">(Size: XL, Color: Brown)</span>
+                                                        <span> (17 product(s) available) <span class="text-info"> ($61.79)</span></span>
+                                                   </div>
+                                                   <a href="">Add</a>
+                                                </div>
+                                                
+                                            </li>
+                                            <li class="product-variant">
+                                                <div class="attribute-wrap">
+                                                    <div>
+                                                        <span class="text-success">(Size: S, Color: Blue)</span>
+                                                        <span> (17 product(s) available) <span class="text-info"> ($61.79)</span></span>
+                                                   </div>
+                                                   <a href="">Add</a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="item-not-selectable">
+                                    <div class="product-wrap">
+                                        <img src="https://edutalk.edu.vn/_nuxt/assets/images/default.jpg" width="35" height="35" alt="">
+                                        <span>Dual Camera 20MP (Digital) (GoPro)</span>
+                                    </div>
+                                    <div>
+                                        <ul>
+                                            <li class="product-variant">
+                                                <div class="attribute-wrap">
+                                                   <div>
+                                                        <span class="text-success">(Size: XL, Color: Brown)</span>
+                                                        <span> (17 product(s) available) <span class="text-info"> ($61.79)</span></span>
+                                                   </div>
+                                                   <a href="">Add</a>
+                                                </div>
+                                                
+                                            </li>
+                                            <li class="product-variant">
+                                                <div class="attribute-wrap">
+                                                    <div>
+                                                        <span class="text-success">(Size: S, Color: Blue)</span>
+                                                        <span> (17 product(s) available) <span class="text-info"> ($61.79)</span></span>
+                                                   </div>
+                                                   <a href="">Add</a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </template>
+                           
+                       </div>
+                       {{-- <template x-if="products.length !== 0" >
+                            <div class="panel-order" >
+                            <table class="table table-bordered table-order" >
+                                <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">{{ trans('orders.PRODUCT NAME') }}</th>
+                                    <th scope="col">{{ trans('orders.PRICE') }}</th>
+                                    <th scope="col">{{ trans('orders.QUANTITY') }}</th>
+                                    <th scope="col">{{ trans('orders.TOTAL') }}</th>
+                                    <th scope="col">{{ trans('orders.ACTION') }}</th>
+                                </tr>
+                                </thead>
+                                <style>
+                                    .table .order-image-table {
+                                        width: 50px;
+                                        object-fit: cover;
+                                    }
+                                    .table .order-product-name-table{
+                                        text-decoration: none !important;
+                                        font-weight: 500;
+                                    }
+                                    .table .order-product-description-table{
+                                        font-size: 12px !important;
+                                    }
+                                    .table-order td{
+                                        width:10%
+                                    }
+                                    .table-order span{
+                                        font-weight: 600;
+                                        color:#444;
+                                        margin: 0;
+                                        padding-top: 12px;
+                                    }
+                                    .table-order>thead:first-child>tr:first-child>th{
+                                        font-weight: 400;
+                                        font-size: 12px !important;
+                                        color:#959595;
+                                        
+                                    }
+                                    .table-order input{
+                                        border-radius: 5px;
+                                        border: 0.5px solid rgb(183, 181, 181);
+                                        padding: 5px 0px 5px 0px;
+                                        width: 60px;
+                                        margin-top: 7px;
+                                        align-items: center;
+                                        display: flex;
+
+                                    }
+                                    .table-order p{
+                                        align-items: center;
+                                        display: flex;
+                                    }
+                                </style>
+                                <tbody>
+                                    <template x-for="(item, index) in products" :key="index">
+                                        <tr>
+                                            <th style="width:10%">
+                                                <img class="order-image-table" :src="imageVoyager(item.featured_image)" alt="" style="">
+                                            </th>
+                                            <th> 
+                                                <a class="order-product-name-table" href="" x-text="item.name"></a>
+                                                <p class="order-product-description-table">(Size: XL, Color: Black)</p>
+                                            </th>
+                                            <td> 
+                                                <p><span x-text="item.price">$100.00</span></p>
+                                            </td>
+                                            <td>
+                                            <input x-model='item.quantity' type="number" name="quantity" id="" style="width: 70px;">
+                                            </td>
+                                            <td> 
+                                                <p><span>$100.00</span></p>
+                                            </td>
+                                            <td>
+                                            
+                                                <span style="display: flex;
+                                                        align-items: center;
+                                                        justify-content: center;"
+                                                        >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"><path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path></svg>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                            </div>
+                        </template> --}}
                     </div>
                     
                 </div>
@@ -194,7 +296,25 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('orders', () => ({
-                
+                products:[],
+                searchProduct(keyword){
+                    fetch('{{ route('search_product') }}?search=' + encodeURIComponent(keyword), {
+                        method: 'GET',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.products = data.results.map(product => ({ ...product, quantity: 0 }));
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi tải lên:', error);
+                    });
+                },
+                imageVoyager(image){
+                    if(image === null){
+                       return 'https://edutalk.edu.vn/_nuxt/assets/images/default.jpg' 
+                    }
+                    return `{{Voyager::image('/')}}`+image
+                }
             }))
         })
     </script>

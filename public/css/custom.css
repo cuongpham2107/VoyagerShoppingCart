@@ -226,3 +226,60 @@ table.table-attributes thead th{
        margin: 0;
        margin-right: 5px;
     }
+    .panel-order{
+        margin: 10px;
+    }
+    .list-search-data,  .list-search-data li{
+        list-style: none;
+
+    }
+    .list-search-data{
+        margin-top: 10px;
+        border: 1px solid #e4eaec;
+      
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        overflow: auto;
+        height: 300px;
+        padding: 0px;
+    }
+    .list-search-data .item-not-selectable{
+        border: 1px solid #e4eaec;
+        padding: 20px 20px 0px 20px;
+    }
+    .product-wrap{
+        display: flex;
+        align-items: center;
+    }
+    .product-wrap img{
+       margin-right: 10px;
+    }
+    .product-wrap span{
+        font-size: 13px;
+        font-weight: 500;
+        color: #565656;
+     }
+     .product-variant{
+        margin-top: 15px;
+        margin-bottom: 20px;
+     }
+     .text-success{
+        color: #1a8754;
+     }
+     .attribute-wrap{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 500;
+        color: #565656;
+     }
+     .attribute-wrap a{
+        border: 1px solid rgb(100, 100, 245);
+        border-radius: 5px;
+        padding: 5px 15px 5px 15px;
+        font-weight: 600;
+        margin-right: 40px;
+     }
+     .text-info{
+        color: #11caf0;
+     }
